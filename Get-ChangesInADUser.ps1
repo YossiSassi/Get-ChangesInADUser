@@ -19,10 +19,17 @@ $i = 1;
 $DCs | foreach {
     $DC = $_;
     # check if ANY 4738 events exist/are collected
-    if (Get-WinEvent -ComputerName $DC -FilterHashtable @{logname='security';id=4738} -MaxEvents 1) 
+    if (Get-WinEvent -ComputerName $DC -FilterHashtable @{logname='security';id=4738} -MaxEvents 1)
         {
-            Write-Host "[x] Fetching relevant events from $DC ($i of $(($DCs | Measure-Object).count))..." -ForegroundColor Cyan;
-            $Event4738 += Get-WinEvent -ComputerName $DC -FilterHashtable @{logname='security';id=4738}
+            Write-Host "[x] Fetching relevant events from $DC ($i of $(($DCs | Measure-Object).count))..." -ForegroundColor Cyan -NoNewline;
+            $Event4738 += Get-WinEvent -ComputerName $DC -FilterHashtable @{logname='security';id=4738} -ErrorAction SilentlyContinue;
+            if (!$?) {
+                Write-Host " An Error Occured. Check port connectivity." -ForegroundColor Yellow
+            }
+            else
+            {
+                Write-Host " Successful query." -ForegroundColor Green
+            }
         }
     else
         {
